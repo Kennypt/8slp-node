@@ -1,0 +1,21 @@
+{
+    "name": "8slp-node",
+    "version": "0.0.1",
+    "description": "Eight Sleep Smart Matress - Api Client",
+    "main": "index.js",
+    "scripts": {
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Kennypt/8slp-home.git"
+    },
+    "author": "Kennypt",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Kennypt/8slp-home/issues"
+    },
+    "homepage": "https://github.com/Kennypt/8slp-home#readme",
+    "dependencies": {
+        
+    }
+}
