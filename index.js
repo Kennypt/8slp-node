@@ -1,7 +1,9 @@
 const client = require('./client');
 const Session = require('./session');
 
-const MIN_TEMPERATURE_VALUE = 15;
+const MIN_TEMPERATURE_VALUE = 10;
+const MIN_TEMPERATURE_IN_BED_VALUE = 25;
+const HEAT_LEVEL_OFFSET = 8;
 
 class EightClient {
     constructor(session, deviceId, isOwner, rightSide, leftSide, online, timezone) {
@@ -37,20 +39,12 @@ class EightClient {
         return await userWokeUp(this.session, this.timezone, this.rightSide.userId);
     }
 
-    async leftIsSleeping() {
-        if(!refreshBedSidesData(this.session, this.deviceId)) {
-            return false;
-        }
-
-        return this.leftSide.heatingLevel > MIN_TEMPERATURE_VALUE;
+    async leftInBed() {
+        return inBed(this, 'left');
     }
 
-    async rightIsSleeping() {
-        if (!refreshBedSidesData(this.session, this.deviceId)) {
-            return false;
-        }
-
-        return this.rightSide.heatingLevel > MIN_TEMPERATURE_VALUE;
+    async rightInBed() {
+        return inBed(this, 'right');
     }
 
     isSessionValid() {
@@ -70,6 +64,19 @@ function buildSideData(side, data) {
         schedule: data[`${side}Schedule`],
         isOwner: data[`${side}UserId`] === data.ownerId
     };
+}
+
+async function inBed(self, side) {
+    const refreshSuccess = await refreshBedSidesData(self);
+    if (!refreshSuccess) {
+        return false;
+    }
+
+    const { heatingLevel, schedule, nowHeating, targetHeatingLevel } = self[`${side}Side`];
+
+    const heatDelta = nowHeating ? (heatingLevel - targetHeatingLevel) : (heatingLevel - MIN_TEMPERATURE_VALUE);
+
+    return heatDelta >= HEAT_LEVEL_OFFSET && currentHeatLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
 }
 
 async function refreshBedSidesData(self) {
