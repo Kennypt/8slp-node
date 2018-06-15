@@ -40,11 +40,11 @@ class EightClient {
     }
 
     async leftInBed() {
-        return inBed(this, 'left');
+        return await inBed(this, 'left');
     }
 
     async rightInBed() {
-        return inBed(this, 'right');
+        return await inBed(this, 'right');
     }
 
     isSessionValid() {
