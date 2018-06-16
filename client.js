@@ -42,7 +42,7 @@ async function login(email, password) {
 async function getUserMe(session) {
     return await doRequest(
         session,
-        path,
+        `${ROUTES.BASE_PATH}${ROUTES.USER_ME}`, 
         'GET',
         undefined,
         5
@@ -112,9 +112,9 @@ async function getDeviceById(session, deviceId, filter) {
 
 async function doRequest(session, path, method, body, ttl) {
     if (method === 'GET') {
-        const cache = cache.get(`route:${path}`);
-        if (cache) {
-            return cache;
+        const cacheValue = cache.get(`route:${path}`);
+        if (cacheValue) {
+            return cacheValue;
         }
     }
 
