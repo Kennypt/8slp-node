@@ -32,11 +32,11 @@ class EightClient {
     }
 
     async leftSideWokeUp() {
-        return await userWokeUp(this.session, this.timezone, this.leftSide.userId);
+        return await userWokeUp(this, 'left');
     }
 
     async rightSideWokeUp() {
-        return await userWokeUp(this.session, this.timezone, this.rightSide.userId);
+        return await userWokeUp(this, 'right');
     }
 
     async leftInBed() {
@@ -92,7 +92,10 @@ async function refreshBedSidesData(self) {
     return true;
 }
 
-async function userWokeUp(session, timezone, userId) {
+async function userWokeUp(self, side) {
+    const { session, timezone } = self;
+    const userId = self[`${side}Side`].userId;
+
     const from = getDate(timezone, -1).format('YYYY-MM-DD');
     const to = getDate(timezone).format('YYYY-MM-DD');
 
@@ -105,7 +108,8 @@ async function userWokeUp(session, timezone, userId) {
         }
     }
 
-    return false;
+    await refreshBedSidesData(self);
+    return self[`${side}Side`].heatingLevel === MIN_TEMPERATURE_IN_BED_VALUE;
 }
 
 function getDate(timezone, daysOffset = 0) {
