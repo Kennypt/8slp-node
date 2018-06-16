@@ -46,19 +46,19 @@ class EightClient {
     }
 
     async leftPresenceEnd() {
-        return await getPresenceEnd(this, 'left');
+        return await hasPresenceEnd(this, 'left');
     }
 
     async rightPresenceEnd() {
-        return await getPresenceEnd(this, 'right');
+        return await hasPresenceEnd(this, 'right');
     }
 
     async leftPresenceStart() {
-        return await getPresenceStart(this, 'left');
+        return await isInBed(this, 'left');
     }
 
     async rightPresenceStart() {
-        return await getPresenceStart(this, 'right');
+        return await isInBed(this, 'right');
     }
 
     async sleepEnd() {
@@ -84,11 +84,11 @@ class EightClient {
     }
 
     async leftSleepEnd() {
-        return await getSleepEnd(this, 'left');
+        return await hasSleepEnd(this, 'left');
     }
 
     async rightSleepEnd() {
-        return await getSleepEnd(this, 'right');
+        return await hasSleepEnd(this, 'right');
     }
 
     isSessionValid() {
@@ -123,7 +123,7 @@ async function refreshBedSidesData(self) {
     return true;
 }
 
-async function getPresenceStart(self, side) {
+async function isInBed(self, side) {
     /* 
     await refreshBedSidesData(self);
     return self[`${side}Side`].heatingLevel === MIN_TEMPERATURE_IN_BED_VALUE; 
@@ -141,18 +141,20 @@ async function getPresenceStart(self, side) {
     return heatDelta >= HEAT_LEVEL_OFFSET && currentHeatLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
 }
 
-async function getPresenceEnd(self, side) {
+async function hasPresenceEnd(self, side) {
     const trends = await getLastDayTrends(self);
 
     if (!trends) {
-        return false;
+        const inBed = await isInBed(self, side);
+        return !inBed;
     }
 
+    // TODO: Should look at incomplete?
     const { presenceEnd } = trends;
     return (presenceEnd && (new Date(presenceEnd).getTime() - getDate(timezone).getTime() > 0));
 }
 
-async function getSleepEnd(self, side) {
+async function hasSleepEnd(self, side) {
     const trends = await getLastDayTrends(self);
 
     if (!trends) {
