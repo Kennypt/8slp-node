@@ -103,7 +103,7 @@ async function getDeviceById(session, deviceId, filter) {
 
     return await doRequest(
         session,
-        `${ROUTES.BASE_PATH}${ROUTES.DEVICE.replace('{{userId}}', userId)}?filter=${filter}`,
+        `${ROUTES.BASE_PATH}${ROUTES.DEVICE.replace('{{deviceId}}', deviceId)}${filter? '?filter=${filter}' : ''}`,
         'GET',
         undefined,
         5
@@ -136,18 +136,24 @@ async function doRequest(session, path, method, body, ttl) {
 			{
 				method,
 				hostname: ROUTES.HOSTNAME,
-				path,
+				path: encodeURI(path),
 				headers
 			},
 			(response) => {
-				response.setEncoding('utf8');
+                let resData = '';
+                response.setEncoding('utf8');
+                
 				response.on('data', function(chunk) {
-                    const res = JSON.parse(chunk);
+                    resData += chunk;
+                });
+                
+                response.on('end', function () {
+                    const jsonRes = JSON.parse(resData);
                     if (method === 'GET' && ttl) {
-                        cache.store(`route:${path}`, res, ttl);
+                        cache.store(`route:${path}`, jsonRes, ttl);
                     }
-					resolve(res);
-				});
+                    resolve(jsonRes);
+                });
 
 				response.on('error', function(error) {
 					reject(JSON.parse(error));
@@ -157,8 +163,9 @@ async function doRequest(session, path, method, body, ttl) {
 
 		if (reqData) {
             request.write(reqData);
-			request.end();
-		}
+        }
+        
+        request.end();
 	});
 }
 

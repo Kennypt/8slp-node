@@ -6,7 +6,7 @@ const MIN_TEMPERATURE_IN_BED_VALUE = 25;
 const HEAT_LEVEL_OFFSET = 8;
 
 class EightClient {
-    constructor(session, deviceId, isOwner, rightSide, leftSide, online, timezone) {
+    constructor(session, deviceId, rightSide, leftSide, online, timezone) {
         this.session = session;
         this.deviceId = deviceId;
         this.rightSide = rightSide;
@@ -23,9 +23,13 @@ class EightClient {
         const resUserMe = await client.getUserMe(session);
         if (resUserMe && resUserMe.user && resUserMe.user.devices && resUserMe.user.devices.length) {
             deviceId = resUserMe.user.devices[0];
-            timezone = esUserMe.user.timezone;
+            timezone = resUserMe.user.timezone;
             
-            await refreshBedSidesData(this);
+            const self = { session, deviceId };
+            await refreshBedSidesData(self);
+            rightSide = self.rightSide;
+            leftSide = self.leftSide;
+            online = self.online;
         }
 
         return new EightClient(session, deviceId, rightSide, leftSide, online, timezone);
@@ -111,7 +115,7 @@ function buildSideData(side, data) {
 }
 
 async function refreshBedSidesData(self) {
-    const resUser = await client.getUserById(self.session, self.deviceId);
+    const resUser = await client.getDeviceById(self.session, self.deviceId);
     if (!resUser || !resUser.result) {
         return false;
     }
@@ -142,7 +146,7 @@ async function isInBed(self, side) {
 }
 
 async function hasPresenceEnd(self, side) {
-    const trends = await getLastDayTrends(self);
+    const trends = await getLastDayTrends(self, side);
 
     if (!trends) {
         const inBed = await isInBed(self, side);
@@ -155,7 +159,7 @@ async function hasPresenceEnd(self, side) {
 }
 
 async function hasSleepEnd(self, side) {
-    const trends = await getLastDayTrends(self);
+    const trends = await getLastDayTrends(self, side);
 
     if (!trends) {
         return false;
@@ -165,23 +169,33 @@ async function hasSleepEnd(self, side) {
     return (sleepEnd && (new Date(sleepEnd).getTime() - getDate(timezone).getTime() > 0));
 }
 
-async function getLastDayTrends(self) {
+async function getLastDayTrends(self, side) {
     const { session, timezone } = self;
     const userId = self[`${side}Side`].userId;
 
-    const from = getDate(timezone, -1).format('YYYY-MM-DD');
-    const to = getDate(timezone).format('YYYY-MM-DD');
+    const from = getFormattedDate(timezone, -1);
+    const to = getFormattedDate(timezone);
 
     const res = await client.getTrendsByUserId(session, userId, timezone, from, to);
 
     return res && res.days && res.days.length && res.days[0];
 }
 
-function getDate(timezone, daysOffset = 0) {
+function getFormattedDate(timezone, daysOffset = 0) {
+    const now = new Date();
+
     if (daysOffset === 0) {
-        return new Date();
+        const year = now.getYear() + 1900;
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        return `${year}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`;
     }
-    return new Date((new Date()).setDate(myDate.getDate() + daysOffset));
+
+    const date = new Date(now.setDate(now.getDate() + daysOffset));
+    const year = date.getYear() + 1900;
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`;
 }
 
 module.exports = EightClient;

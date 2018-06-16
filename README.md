@@ -32,3 +32,4 @@ Eight Smart Matress (Unofficial) - Node Api Integration
 - Heating duration up;
 - Get latest sleep score
 - Monitor temperature
+- Debug mode
