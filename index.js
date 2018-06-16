@@ -31,20 +31,64 @@ class EightClient {
         return new EightClient(session, deviceId, rightSide, leftSide, online, timezone);
     }
 
-    async leftSideWokeUp() {
-        return await userWokeUp(this, 'left');
+    async presenceEnd() {
+        const left = await this.leftPresenceEnd();
+        const right = await this.rightPresenceEnd();
+
+        return left && right;
     }
 
-    async rightSideWokeUp() {
-        return await userWokeUp(this, 'right');
+    async presenceStart() {
+        const left = await this.leftPresenceStart();
+        const right = await this.rightPresenceStart();
+
+        return left && right;
     }
 
-    async leftInBed() {
-        return await inBed(this, 'left');
+    async leftPresenceEnd() {
+        return await getPresenceEnd(this, 'left');
     }
 
-    async rightInBed() {
-        return await inBed(this, 'right');
+    async rightPresenceEnd() {
+        return await getPresenceEnd(this, 'right');
+    }
+
+    async leftPresenceStart() {
+        return await getPresenceStart(this, 'left');
+    }
+
+    async rightPresenceStart() {
+        return await getPresenceStart(this, 'right');
+    }
+
+    async sleepEnd() {
+        const left = await this.leftSleepEnd();
+        const right = await this.rightSleepEnd();
+
+        return left && right;
+    }
+
+    async sleepStart() {
+        // TODO
+        return false;
+    }
+
+    async leftSleepStart() {
+        // TODO
+        return false;
+    }
+
+    async rightSleepStart() {
+        // TODO
+        return false;
+    }
+
+    async leftSleepEnd() {
+        return await getSleepEnd(this, 'left');
+    }
+
+    async rightSleepEnd() {
+        return await getSleepEnd(this, 'right');
     }
 
     isSessionValid() {
@@ -66,19 +110,6 @@ function buildSideData(side, data) {
     };
 }
 
-async function inBed(self, side) {
-    const refreshSuccess = await refreshBedSidesData(self);
-    if (!refreshSuccess) {
-        return false;
-    }
-
-    const { heatingLevel, schedule, nowHeating, targetHeatingLevel } = self[`${side}Side`];
-
-    const heatDelta = nowHeating ? (heatingLevel - targetHeatingLevel) : (heatingLevel - MIN_TEMPERATURE_VALUE);
-
-    return heatDelta >= HEAT_LEVEL_OFFSET && currentHeatLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
-}
-
 async function refreshBedSidesData(self) {
     const resUser = await client.getUserById(self.session, self.deviceId);
     if (!resUser || !resUser.result) {
@@ -92,7 +123,47 @@ async function refreshBedSidesData(self) {
     return true;
 }
 
-async function userWokeUp(self, side) {
+async function getPresenceStart(self, side) {
+    /* 
+    await refreshBedSidesData(self);
+    return self[`${side}Side`].heatingLevel === MIN_TEMPERATURE_IN_BED_VALUE; 
+    */
+
+    const refreshSuccess = await refreshBedSidesData(self);
+    if (!refreshSuccess) {
+        return false;
+    }
+
+    const { heatingLevel, schedule, nowHeating, targetHeatingLevel } = self[`${side}Side`];
+
+    const heatDelta = nowHeating ? (heatingLevel - targetHeatingLevel) : (heatingLevel - MIN_TEMPERATURE_VALUE);
+
+    return heatDelta >= HEAT_LEVEL_OFFSET && currentHeatLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
+}
+
+async function getPresenceEnd(self, side) {
+    const trends = await getLastDayTrends(self);
+
+    if (!trends) {
+        return false;
+    }
+
+    const { presenceEnd } = trends;
+    return (presenceEnd && (new Date(presenceEnd).getTime() - getDate(timezone).getTime() > 0));
+}
+
+async function getSleepEnd(self, side) {
+    const trends = await getLastDayTrends(self);
+
+    if (!trends) {
+        return false;
+    }
+
+    const { sleepEnd } = trends;
+    return (sleepEnd && (new Date(sleepEnd).getTime() - getDate(timezone).getTime() > 0));
+}
+
+async function getLastDayTrends(self) {
     const { session, timezone } = self;
     const userId = self[`${side}Side`].userId;
 
@@ -101,15 +172,7 @@ async function userWokeUp(self, side) {
 
     const res = await client.getTrendsByUserId(session, userId, timezone, from, to);
 
-    if (res && res.days && res.days.length) {
-        const sleepEnd = res.days[0].sleepEnd;
-        if (sleepEnd && (new Date(sleepEnd).getTime() - getDate(timezone).getTime() > 0)) {
-            return true;
-        }
-    }
-
-    await refreshBedSidesData(self);
-    return self[`${side}Side`].heatingLevel === MIN_TEMPERATURE_IN_BED_VALUE;
+    return res && res.days && res.days.length && res.days[0];
 }
 
 function getDate(timezone, daysOffset = 0) {
