@@ -172,7 +172,7 @@ async function hasPresenceEnd(self, side) {
     const { presenceEnd } = trends;
     self.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
 
-    return (presenceEnd && (Date.now() - new Date(presenceEnd).getTime() - Date.now() > 0));
+    return (presenceEnd && (Date.now() - new Date(presenceEnd).getTime() > 0));
 }
 
 async function hasSleepEnd(self, side) {
