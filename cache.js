@@ -1,4 +1,9 @@
-const memoryCache = {};
+let memoryCache = {};
+
+// Clear cache every day
+setInterval(() => {
+    memoryCache = {};
+}, 1 * 24 * 60 * 60 * 1000);
 
 function store(key, value, ttl) {
     memoryCache[key] = {
