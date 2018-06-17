@@ -8,16 +8,17 @@ const HEAT_LEVEL_OFFSET = 8;
 // TODO: Implement safety check is online
 
 class EightClient {
-    constructor(session, deviceId, rightSide, leftSide, online, timezone) {
+    constructor(session, deviceId, rightSide, leftSide, online, timezone, opts) {
         this.session = session;
         this.deviceId = deviceId;
         this.rightSide = rightSide;
         this.leftSide = leftSide;
         this.online = online;
         this.timezone = timezone;
+        this.debug = opts.debug;
     }
 
-    static async create(email, password) {
+    static async create(email, password, opts = { debug: false }) {
         let deviceId, rightSide, leftSide, online, timezone;
         const session = await Session.create(email, password);
 
@@ -34,10 +35,12 @@ class EightClient {
             online = self.online;
         }
 
-        return new EightClient(session, deviceId, rightSide, leftSide, online, timezone);
+        return new EightClient(session, deviceId, rightSide, leftSide, online, timezone, opts);
     }
 
     async presenceEnd() {
+        this.debug && console.log('8slp: presenceEnd');
+        
         const left = await this.leftPresenceEnd();
         const right = await this.rightPresenceEnd();
 
@@ -52,10 +55,12 @@ class EightClient {
     }
 
     async leftPresenceEnd() {
+        this.debug && console.log('8slp: leftPresenceEnd');
         return await hasPresenceEnd(this, 'left');
     }
 
     async rightPresenceEnd() {
+        this.debug && console.log('8slp: rightPresenceEnd');
         return await hasPresenceEnd(this, 'right');
     }
 
@@ -130,12 +135,16 @@ async function refreshBedSidesData(self) {
 }
 
 async function isInBed(self, side) {
+    this.debug && console.log('8slp: isInBed');
+
     /* 
     await refreshBedSidesData(self);
     return self[`${side}Side`].heatingLevel === MIN_TEMPERATURE_IN_BED_VALUE; 
     */
 
     const refreshSuccess = await refreshBedSidesData(self);
+
+    this.debug && console.log('8slp[isInBed]: refreshSuccess', refreshSuccess);
     if (!refreshSuccess) {
         return false;
     }
@@ -143,20 +152,26 @@ async function isInBed(self, side) {
     const { heatingLevel, schedule, nowHeating, targetHeatingLevel } = self[`${side}Side`];
 
     const heatDelta = nowHeating ? (heatingLevel - targetHeatingLevel) : (heatingLevel - MIN_TEMPERATURE_VALUE);
+    this.debug && console.log('8slp[isInBed]: heatDelta', heatDelta);
 
     return heatDelta >= HEAT_LEVEL_OFFSET && heatingLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
 }
 
 async function hasPresenceEnd(self, side) {
+    this.debug && console.log('8slp: hasPresenceEnd');
     const trends = await getLastDayTrends(self, side);
 
+    this.debug && console.log('8slp[hasPresenceEnd]: trends - ', trends);
     if (!trends) {
         const inBed = await isInBed(self, side);
+        this.debug && console.log('8slp[hasPresenceEnd]: inBed? ', inBed);
         return !inBed;
     }
 
     // TODO: Should look at incomplete?
     const { presenceEnd } = trends;
+    this.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
+
     return (presenceEnd && (new Date(presenceEnd).getTime() - Date.now() > 0));
 }
 
