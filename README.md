@@ -11,9 +11,15 @@ No dependencies.
 
 Inspired by [Smart Things](https://github.com/alyc100/SmartThingsPublic/blob/master/devicetypes/alyc100/eight-sleep-mattress.src/eight-sleep-mattress.groovy).
 
+## Installation
+
+`$ npm install --save 8slp-node`
+
+```javascript
     const EightClient = require('8slp-node');
     (...)
     const eightClient = await EightClient.create('email@foo.com', 'password');
+```
 
  - presenceEnd(): Both left and right sides have left bed.
  - leftPresenceEnd(): Left side has left bed.
@@ -28,7 +34,7 @@ Inspired by [Smart Things](https://github.com/alyc100/SmartThingsPublic/blob/mas
  - rightSleepStart(): (TODO) Right side is sleeping.
  - rightSleepEnd(): Right side is awake.
 
-# TODO
+## TODO
 - Set temperature level;
 - Level up;
 - Level down;
