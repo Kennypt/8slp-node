@@ -172,7 +172,7 @@ async function hasPresenceEnd(self, side) {
     const { presenceEnd } = trends;
     self.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
 
-    return (presenceEnd && (new Date(presenceEnd).getTime() - Date.now() > 0));
+    return (presenceEnd && (Date.now() - new Date(presenceEnd).getTime() - Date.now() > 0));
 }
 
 async function hasSleepEnd(self, side) {
@@ -183,7 +183,7 @@ async function hasSleepEnd(self, side) {
     }
 
     const { sleepEnd, incomplete } = trends;
-    return (sleepEnd && (new Date(sleepEnd).getTime() - Date.now() > 0));
+    return (sleepEnd && (Date.now() - new Date(sleepEnd).getTime() > 0));
 }
 
 async function getLastDayTrends(self, side) {
