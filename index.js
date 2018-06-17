@@ -135,7 +135,7 @@ async function refreshBedSidesData(self) {
 }
 
 async function isInBed(self, side) {
-    this.debug && console.log('8slp: isInBed');
+    self.debug && console.log('8slp: isInBed');
 
     /* 
     await refreshBedSidesData(self);
@@ -144,7 +144,7 @@ async function isInBed(self, side) {
 
     const refreshSuccess = await refreshBedSidesData(self);
 
-    this.debug && console.log('8slp[isInBed]: refreshSuccess', refreshSuccess);
+    self.debug && console.log('8slp[isInBed]: refreshSuccess', refreshSuccess);
     if (!refreshSuccess) {
         return false;
     }
@@ -152,25 +152,25 @@ async function isInBed(self, side) {
     const { heatingLevel, schedule, nowHeating, targetHeatingLevel } = self[`${side}Side`];
 
     const heatDelta = nowHeating ? (heatingLevel - targetHeatingLevel) : (heatingLevel - MIN_TEMPERATURE_VALUE);
-    this.debug && console.log('8slp[isInBed]: heatDelta', heatDelta);
+    self.debug && console.log('8slp[isInBed]: heatDelta', heatDelta);
 
     return heatDelta >= HEAT_LEVEL_OFFSET && heatingLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
 }
 
 async function hasPresenceEnd(self, side) {
-    this.debug && console.log('8slp: hasPresenceEnd');
+    self.debug && console.log('8slp: hasPresenceEnd');
     const trends = await getLastDayTrends(self, side);
 
-    this.debug && console.log('8slp[hasPresenceEnd]: trends - ', trends);
+    self.debug && console.log('8slp[hasPresenceEnd]: trends - ', trends);
     if (!trends) {
         const inBed = await isInBed(self, side);
-        this.debug && console.log('8slp[hasPresenceEnd]: inBed? ', inBed);
+        self.debug && console.log('8slp[hasPresenceEnd]: inBed? ', inBed);
         return !inBed;
     }
 
     // TODO: Should look at incomplete?
     const { presenceEnd } = trends;
-    this.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
+    self.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
 
     return (presenceEnd && (new Date(presenceEnd).getTime() - Date.now() > 0));
 }
