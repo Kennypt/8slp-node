@@ -142,7 +142,7 @@ async function isInBed(self, side) {
 
     const heatDelta = nowHeating ? (heatingLevel - targetHeatingLevel) : (heatingLevel - MIN_TEMPERATURE_VALUE);
 
-    return heatDelta >= HEAT_LEVEL_OFFSET && currentHeatLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
+    return heatDelta >= HEAT_LEVEL_OFFSET && heatingLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
 }
 
 async function hasPresenceEnd(self, side) {
