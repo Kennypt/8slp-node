@@ -3,11 +3,13 @@
 
   **[WORK IN PROGRESS]**
 
-Eight Smart Matress (Unofficial) - Node Api Integration
+Eight Smart Matress (Unofficial) - Node Api Integration.
+
 No dependencies.
-ES6.
-Node verion > 8
-Inspired by https://github.com/alyc100/SmartThingsPublic/blob/master/devicetypes/alyc100/eight-sleep-mattress.src/eight-sleep-mattress.groovy
+
+8slp requires [Node.js](https://nodejs.org/) v8+ to run.
+
+Inspired by [Smart Things](https://github.com/alyc100/SmartThingsPublic/blob/master/devicetypes/alyc100/eight-sleep-mattress.src/eight-sleep-mattress.groovy).
 
     const EightClient = require('8slp-node');
     (...)
