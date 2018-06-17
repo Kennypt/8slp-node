@@ -15,10 +15,12 @@ Inspired by [Smart Things](https://github.com/alyc100/SmartThingsPublic/blob/mas
 
 `$ npm install --save 8slp-node`
 
+## Example
+
 ```javascript
-    const EightClient = require('8slp-node');
-    (...)
-    const eightClient = await EightClient.create('email@foo.com', 'password');
+const EightClient = require('8slp-node');
+(...)
+const eightClient = await EightClient.create('email@foo.com', 'password');
 ```
 
  - presenceEnd(): Both left and right sides have left bed.
