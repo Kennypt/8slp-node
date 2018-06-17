@@ -22,7 +22,7 @@ Inspired by [Smart Things](https://github.com/alyc100/SmartThingsPublic/blob/mas
  - leftPresenceStart(): Left side is in bed.
  - rightPresenceStart(): Right side is in bed.
  - sleepEnd(): Both left and right sides are awake (might still be in bed).
- - sleepStart(): [TODO] Both left and right sides are sleeping.
+ - sleepStart(): (TODO) Both left and right sides are sleeping.
  - leftSleepEnd(): Left side is awake.
  - leftSleepStart(): (TODO) Left side is sleeping.
  - rightSleepStart(): (TODO) Right side is sleeping.
@@ -39,3 +39,4 @@ Inspired by [Smart Things](https://github.com/alyc100/SmartThingsPublic/blob/mas
 - Get latest sleep score
 - Monitor temperature
 - Debug mode
+- Is online

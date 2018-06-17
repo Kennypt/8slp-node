@@ -5,6 +5,8 @@ const MIN_TEMPERATURE_VALUE = 10;
 const MIN_TEMPERATURE_IN_BED_VALUE = 25;
 const HEAT_LEVEL_OFFSET = 8;
 
+// TODO: Implement safety check is online
+
 class EightClient {
     constructor(session, deviceId, rightSide, leftSide, online, timezone) {
         this.session = session;
@@ -155,7 +157,7 @@ async function hasPresenceEnd(self, side) {
 
     // TODO: Should look at incomplete?
     const { presenceEnd } = trends;
-    return (presenceEnd && (new Date(presenceEnd).getTime() - getDate(timezone).getTime() > 0));
+    return (presenceEnd && (new Date(presenceEnd).getTime() - Date.now() > 0));
 }
 
 async function hasSleepEnd(self, side) {
@@ -165,8 +167,8 @@ async function hasSleepEnd(self, side) {
         return false;
     }
 
-    const { sleepEnd } = trends;
-    return (sleepEnd && (new Date(sleepEnd).getTime() - getDate(timezone).getTime() > 0));
+    const { sleepEnd, incomplete } = trends;
+    return (sleepEnd && (new Date(sleepEnd).getTime() - Date.now() > 0));
 }
 
 async function getLastDayTrends(self, side) {
