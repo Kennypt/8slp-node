@@ -162,13 +162,12 @@ async function hasPresenceEnd(self, side) {
     const trends = await getLastDayTrends(self, side);
 
     self.debug && console.log('8slp[hasPresenceEnd]: trends - ', trends);
-    if (!trends) {
+    if (!trends || trends.incomplete) {
         const inBed = await isInBed(self, side);
         self.debug && console.log('8slp[hasPresenceEnd]: inBed? ', inBed);
         return !inBed;
     }
 
-    // TODO: Should look at incomplete?
     const { presenceEnd } = trends;
     self.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
 
@@ -178,7 +177,7 @@ async function hasPresenceEnd(self, side) {
 async function hasSleepEnd(self, side) {
     const trends = await getLastDayTrends(self, side);
 
-    if (!trends) {
+    if (!trends || trends.incomplete) {
         return false;
     }
 
