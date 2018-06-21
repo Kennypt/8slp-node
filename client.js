@@ -172,7 +172,7 @@ async function doRequest(session, path, method, body, ttl) {
         
         request.on('error', (error) => {
             console.log('8slp[doRequest] - request error', error);
-            reject(JSON.parse(error));
+            reject(error);
         });
 
 		if (reqData) {
