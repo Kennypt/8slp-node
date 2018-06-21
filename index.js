@@ -1,5 +1,6 @@
 const client = require('./client');
 const Session = require('./session');
+const utils = require('./utils');
 
 const MIN_TEMPERATURE_VALUE = 10;
 const MIN_TEMPERATURE_IN_BED_VALUE = 25;
@@ -189,29 +190,12 @@ async function getLastDayTrends(self, side) {
     const { session, timezone } = self;
     const userId = self[`${side}Side`].userId;
 
-    const from = getFormattedDate(timezone, -1);
-    const to = getFormattedDate(timezone);
+    const from = utils.getFormattedDate(timezone, -1);
+    const to = utils.getFormattedDate(timezone);
 
     const res = await client.getTrendsByUserId(session, userId, timezone, from, to);
 
     return res && res.days && res.days.length && res.days[0];
-}
-
-function getFormattedDate(timezone, daysOffset = 0) {
-    const now = new Date();
-
-    if (daysOffset === 0) {
-        const year = now.getYear() + 1900;
-        const month = now.getMonth() + 1;
-        const day = now.getDate();
-        return `${year}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`;
-    }
-
-    const date = new Date(now.setDate(now.getDate() + daysOffset));
-    const year = date.getYear() + 1900;
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${year}-${month < 10 ? `0${month}` : month}-${day < 10 ? `0${day}` : day}`;
 }
 
 module.exports = EightClient;

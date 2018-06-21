@@ -110,6 +110,14 @@ async function getDeviceById(session, deviceId, filter) {
     );
 }
 
+/**
+ * 
+ * @param {Object} session - session object
+ * @param {string} path - request path
+ * @param {string} method - http methods
+ * @param {Object} body - to be sent on the request
+ * @param {integer} ttl - (cache) time to live in minutes
+ */
 async function doRequest(session, path, method, body, ttl) {
     if (method === 'GET') {
         const cacheValue = cache.get(`route:${path}`);
@@ -156,10 +164,16 @@ async function doRequest(session, path, method, body, ttl) {
                 });
 
 				response.on('error', function(error) {
+                    console.log('8slp[doRequest] - response error', error);
 					reject(JSON.parse(error));
 				});
 			}
-		);
+        );
+        
+        request.on('error', (error) => {
+            console.log('8slp[doRequest] - request error', error);
+            reject(JSON.parse(error));
+        });
 
 		if (reqData) {
             request.write(reqData);
