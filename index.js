@@ -9,203 +9,203 @@ const HEAT_LEVEL_OFFSET = 8;
 // TODO: Implement safety check is online
 
 class EightClient {
-    constructor(session, deviceId, rightSide, leftSide, online, timezone, opts) {
-        this.session = session;
-        this.deviceId = deviceId;
-        this.rightSide = rightSide;
-        this.leftSide = leftSide;
-        this.online = online;
-        this.timezone = timezone;
-        this.debug = opts.debug;
-    }
+	constructor(session, deviceId, rightSide, leftSide, online, timezone, opts) {
+		this.session = session;
+		this.deviceId = deviceId;
+		this.rightSide = rightSide;
+		this.leftSide = leftSide;
+		this.online = online;
+		this.timezone = timezone;
+		this.debug = opts.debug;
+	}
 
-    static async create(email, password, opts = { debug: false }) {
-        let deviceId, rightSide, leftSide, online, timezone;
-        const session = await Session.create(email, password);
+	static async create(email, password, opts = { debug: false }) {
+		let deviceId, rightSide, leftSide, online, timezone;
+		const session = await Session.create(email, password);
 
-        // Get device id
-        const resUserMe = await client.getUserMe(session);
-        if (resUserMe && resUserMe.user && resUserMe.user.devices && resUserMe.user.devices.length) {
-            deviceId = resUserMe.user.devices[0];
-            timezone = resUserMe.user.timezone;
-            
-            const self = { session, deviceId };
-            await refreshBedSidesData(self);
-            rightSide = self.rightSide;
-            leftSide = self.leftSide;
-            online = self.online;
-        }
+		// Get device id
+		const resUserMe = await client.getUserMe(session);
+		if (resUserMe && resUserMe.user && resUserMe.user.devices && resUserMe.user.devices.length) {
+			deviceId = resUserMe.user.devices[0];
+			timezone = resUserMe.user.timezone;
 
-        return new EightClient(session, deviceId, rightSide, leftSide, online, timezone, opts);
-    }
+			const self = { session, deviceId };
+			await refreshBedSidesData(self);
+			rightSide = self.rightSide;
+			leftSide = self.leftSide;
+			online = self.online;
+		}
 
-    async presenceEnd() {
-        this.debug && console.log('8slp: presenceEnd');
-        
-        const left = await this.leftPresenceEnd();
-        const right = await this.rightPresenceEnd();
+		return new EightClient(session, deviceId, rightSide, leftSide, online, timezone, opts);
+	}
 
-        return left && right;
-    }
+	async presenceEnd() {
+		this.debug && console.log('8slp: presenceEnd');
 
-    async presenceStart() {
-        const left = await this.leftPresenceStart();
-        const right = await this.rightPresenceStart();
+		const left = await this.leftPresenceEnd();
+		const right = await this.rightPresenceEnd();
 
-        return left && right;
-    }
+		return left && right;
+	}
 
-    async leftPresenceEnd() {
-        this.debug && console.log('8slp: leftPresenceEnd');
-        return await hasPresenceEnd(this, 'left');
-    }
+	async presenceStart() {
+		const left = await this.leftPresenceStart();
+		const right = await this.rightPresenceStart();
 
-    async rightPresenceEnd() {
-        this.debug && console.log('8slp: rightPresenceEnd');
-        return await hasPresenceEnd(this, 'right');
-    }
+		return left && right;
+	}
 
-    async leftPresenceStart() {
-        return await isInBed(this, 'left');
-    }
+	async leftPresenceEnd() {
+		this.debug && console.log('8slp: leftPresenceEnd');
+		return await hasPresenceEnd(this, 'left');
+	}
 
-    async rightPresenceStart() {
-        return await isInBed(this, 'right');
-    }
+	async rightPresenceEnd() {
+		this.debug && console.log('8slp: rightPresenceEnd');
+		return await hasPresenceEnd(this, 'right');
+	}
 
-    async sleepEnd() {
-        const left = await this.leftSleepEnd();
-        const right = await this.rightSleepEnd();
+	async leftPresenceStart() {
+		return await isInBed(this, 'left');
+	}
 
-        return left && right;
-    }
+	async rightPresenceStart() {
+		return await isInBed(this, 'right');
+	}
 
-    async sleepStart() {
-        // TODO
-        return false;
-    }
+	async sleepEnd() {
+		const left = await this.leftSleepEnd();
+		const right = await this.rightSleepEnd();
 
-    async leftSleepStart() {
-        // TODO
-        return false;
-    }
+		return left && right;
+	}
 
-    async rightSleepStart() {
-        // TODO
-        return false;
-    }
+	async sleepStart() {
+		// TODO
+		return false;
+	}
 
-    async leftSleepEnd() {
-        return await hasSleepEnd(this, 'left');
-    }
+	async leftSleepStart() {
+		// TODO
+		return false;
+	}
 
-    async rightSleepEnd() {
-        return await hasSleepEnd(this, 'right');
-    }
+	async rightSleepStart() {
+		// TODO
+		return false;
+	}
 
-    isSessionValid() {
-        return this.session && this.session.isValid();
-    }
+	async leftSleepEnd() {
+		return await hasSleepEnd(this, 'left');
+	}
+
+	async rightSleepEnd() {
+		return await hasSleepEnd(this, 'right');
+	}
+
+	isSessionValid() {
+		return this.session && this.session.isValid();
+	}
 }
 
 function buildSideData(side, data) {
-    return {
-        userId: data[`${side}UserId`],
-        heatingLevel: data[`${side}HeatingLevel`],
-        targetHeatingLevel: data[`${side}TargetHeatingLevel`],
-        nowHeating: data[`${side}NowHeating`],
-        heatingDuration: data[`${side}HeatingDuration`],
-        presenceStart: data[`${side}PresenceStart`],
-        presenceEnd: data[`${side}PresenceEnd`],
-        schedule: data[`${side}Schedule`],
-        isOwner: data[`${side}UserId`] === data.ownerId
-    };
+	return {
+		userId: data[`${side}UserId`],
+		heatingLevel: data[`${side}HeatingLevel`],
+		targetHeatingLevel: data[`${side}TargetHeatingLevel`],
+		nowHeating: data[`${side}NowHeating`],
+		heatingDuration: data[`${side}HeatingDuration`],
+		presenceStart: data[`${side}PresenceStart`],
+		presenceEnd: data[`${side}PresenceEnd`],
+		schedule: data[`${side}Schedule`],
+		isOwner: data[`${side}UserId`] === data.ownerId
+	};
 }
 
 async function refreshBedSidesData(self) {
-    const resUser = await client.getDeviceById(self.session, self.deviceId);
-    if (!resUser || !resUser.result) {
-        return false;
-    }
+	const resUser = await client.getDeviceById(self.session, self.deviceId);
+	if (!resUser || !resUser.result) {
+		return false;
+	}
 
-    self.leftSide = buildSideData('left', resUser.result);
-    self.rightSide = buildSideData('right', resUser.result);
-    self.online = resUser.result.online;
+	self.leftSide = buildSideData('left', resUser.result);
+	self.rightSide = buildSideData('right', resUser.result);
+	self.online = resUser.result.online;
 
-    return true;
+	return true;
 }
 
 async function isInBed(self, side) {
-    self.debug && console.log('8slp: isInBed');
+	self.debug && console.log('8slp: isInBed');
 
-    /* 
+	/* 
     await refreshBedSidesData(self);
     return self[`${side}Side`].heatingLevel === MIN_TEMPERATURE_IN_BED_VALUE; 
     */
 
-    const refreshSuccess = await refreshBedSidesData(self);
+	const refreshSuccess = await refreshBedSidesData(self);
 
-    self.debug && console.log('8slp[isInBed]: refreshSuccess', refreshSuccess);
-    if (!refreshSuccess) {
-        return false;
-    }
+	self.debug && console.log('8slp[isInBed]: refreshSuccess', refreshSuccess);
+	if (!refreshSuccess) {
+		return false;
+	}
 
-    const { heatingLevel, schedule, nowHeating, targetHeatingLevel } = self[`${side}Side`];
+	const { heatingLevel, schedule, nowHeating, targetHeatingLevel } = self[`${side}Side`];
 
-    const heatDelta = nowHeating ? (heatingLevel - targetHeatingLevel) : (heatingLevel - MIN_TEMPERATURE_VALUE);
-    self.debug && console.log('8slp[isInBed]: heatDelta', heatDelta);
+	const heatDelta = nowHeating ? heatingLevel - targetHeatingLevel : heatingLevel - MIN_TEMPERATURE_VALUE;
+	self.debug && console.log('8slp[isInBed]: heatDelta', heatDelta);
 
-    return heatDelta >= HEAT_LEVEL_OFFSET && heatingLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
+	return heatDelta >= HEAT_LEVEL_OFFSET && heatingLevel >= MIN_TEMPERATURE_IN_BED_VALUE;
 }
 
 async function hasPresenceEnd(self, side) {
-    self.debug && console.log('8slp: hasPresenceEnd');
-    let trends;
-    try {
-        trends = await getLastDayTrends(self, side);
-    } catch(err) {
-        self.debug && console.log('8slp[hasPresenceEnd]: was not able to get trends');
-    }
+	self.debug && console.log('8slp: hasPresenceEnd');
+	let trends;
+	try {
+		trends = await getLastDayTrends(self, side);
+	} catch (err) {
+		self.debug && console.log('8slp[hasPresenceEnd]: was not able to get trends');
+	}
 
-    self.debug && console.log('8slp[hasPresenceEnd]: trends - ', trends);
-    if (!trends || trends.incomplete) {
-        const inBed = await isInBed(self, side);
-        self.debug && console.log('8slp[hasPresenceEnd]: inBed? ', inBed);
-        return !inBed;
-    }
+	self.debug && console.log('8slp[hasPresenceEnd]: trends - ', trends);
+	if (!trends || trends.incomplete) {
+		const inBed = await isInBed(self, side);
+		self.debug && console.log('8slp[hasPresenceEnd]: inBed? ', inBed);
+		return !inBed;
+	}
 
-    const { presenceEnd } = trends;
-    self.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
+	const { presenceEnd } = trends;
+	self.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
 
-    return (presenceEnd && (Date.now() - new Date(presenceEnd).getTime() > 0));
+	return presenceEnd && Date.now() - new Date(presenceEnd).getTime() > 0;
 }
 
 async function hasSleepEnd(self, side) {
-    let trends;
-    try {
-        trends = await getLastDayTrends(self, side);
-    } catch (err) {
-        self.debug && console.log('8slp[hasSleepEnd]: was not able to get trends');
-    }
+	let trends;
+	try {
+		trends = await getLastDayTrends(self, side);
+	} catch (err) {
+		self.debug && console.log('8slp[hasSleepEnd]: was not able to get trends');
+	}
 
-    if (!trends || trends.incomplete) {
-        return false;
-    }
+	if (!trends || trends.incomplete) {
+		return false;
+	}
 
-    const { sleepEnd, incomplete } = trends;
-    return (sleepEnd && (Date.now() - new Date(sleepEnd).getTime() > 0));
+	const { sleepEnd, incomplete } = trends;
+	return sleepEnd && Date.now() - new Date(sleepEnd).getTime() > 0;
 }
 
 async function getLastDayTrends(self, side) {
-    const { session, timezone } = self;
-    const userId = self[`${side}Side`].userId;
+	const { session, timezone } = self;
+	const userId = self[`${side}Side`].userId;
 
-    const from = utils.getFormattedDate(timezone, -1);
-    const to = utils.getFormattedDate(timezone);
+	const from = utils.getFormattedDate(timezone, -1);
+	const to = utils.getFormattedDate(timezone);
 
-    const res = await client.getTrendsByUserId(session, userId, timezone, from, to);
+	const res = await client.getTrendsByUserId(session, userId, timezone, from, to);
 
-    return res && res.days && res.days.length && res.days[0];
+	return res && res.days && res.days.length && res.days[0];
 }
 
 module.exports = EightClient;
