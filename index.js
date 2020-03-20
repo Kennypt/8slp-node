@@ -159,7 +159,7 @@ async function isInBed(self, side) {
 }
 
 async function hasPresenceEnd(self, side) {
-	self.debug && console.log('8slp: hasPresenceEnd');
+	/* self.debug && console.log('8slp: hasPresenceEnd');
 	let trends;
 	try {
 		trends = await getLastDayTrends(self, side);
@@ -168,16 +168,16 @@ async function hasPresenceEnd(self, side) {
 	}
 
 	self.debug && console.log('8slp[hasPresenceEnd]: trends - ', trends);
-	if (!trends || trends.incomplete) {
+	if (!trends || trends.incomplete) { */
 		const inBed = await isInBed(self, side);
 		self.debug && console.log('8slp[hasPresenceEnd]: inBed? ', inBed);
 		return !inBed;
-	}
+	/* }
 
 	const { presenceEnd } = trends;
 	self.debug && console.log('8slp[hasPresenceEnd]: presenceEnd - ', presenceEnd);
 
-	return presenceEnd && Date.now() - new Date(presenceEnd).getTime() > 0;
+	return presenceEnd && Date.now() - new Date(presenceEnd).getTime() > 0; */
 }
 
 async function hasSleepEnd(self, side) {
